@@ -11,21 +11,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Build Docker image
-      run: |
-        cd app
-        docker build -t ai-inference:${{ github.sha }} .
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./app
+          tags: ai-infra-platform:${{ github.sha }}
+          load: true
 
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: ai-infra-platform:${{ github.sha }}
-        format: 'table'
-        exit-code: '1'
-        ignore-unfixed: true
-        severity: 'CRITICAL,HIGH'
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ai-infra-platform:${{ github.sha }}
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
